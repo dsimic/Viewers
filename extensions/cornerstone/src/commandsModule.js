@@ -66,6 +66,16 @@ const commandsModule = ({ servicesManager }) => {
         cornerstone.setViewport(enabledElement, viewport);
       }
     },
+    invertViewport2: (viewportIdx) => {
+      console.log("invert viewport 2", viewportIdx)
+      const enabledElement = getEnabledElement(viewportIdx);
+
+      if (enabledElement) {
+        let viewport = cornerstone.getViewport(enabledElement);
+        viewport.invert = !viewport.invert;
+        cornerstone.setViewport(enabledElement, viewport);
+      }
+    },
     // TODO: this is receiving `evt` from `ToolbarRow`. We could use it to have
     //       better mouseButtonMask sets.
     setToolActive: ({ toolName }) => {

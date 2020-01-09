@@ -10,6 +10,8 @@ import ConnectedHeader from './ConnectedHeader.js';
 import ConnectedToolbarRow from './ConnectedToolbarRow.js';
 import ConnectedStudyBrowser from './ConnectedStudyBrowser.js';
 import ConnectedViewerMain from './ConnectedViewerMain.js';
+import ConnectedBottomToolbar from './ConnectedBottomToolbar';
+import LayoutManager from './ConnectedLayoutManager';
 import SidePanel from './../components/SidePanel.js';
 import { extensionManager } from './../App.js';
 
@@ -23,26 +25,42 @@ import './Viewer.css';
  * It waits for OHIF Hanging Protocol to be ready to instantiate the ProtocolEngine
  * Hanging Protocol will use OHIF LayoutManager to render viewports properly
  */
-/*const initHangingProtocol = () => {
-    // When Hanging Protocol is ready
-    HP.ProtocolStore.onReady(() => {
+const HP = OHIF.hangingProtocols;
 
-        // Gets all StudyMetadata objects: necessary for Hanging Protocol to access study metadata
-        const studyMetadataList = OHIF.viewer.StudyMetadataList.all();
+const initHangingProtocol = () => {
+  console.log("Calling initHangingProtocol.")
+  // When Hanging Protocol is ready
+  const strategy = new HP.ProtocolStrategy();
+  const protocolStore = new HP.ProtocolStore(strategy);
+  const layoutManager = new LayoutManager();
+  protocolStore.onReady(() => {
+    console.log("ProtocolStore is ready.")
 
-        // Instantiate StudyMetadataSource: necessary for Hanging Protocol to get study metadata
-        const studyMetadataSource = new OHIF.studies.classes.OHIFStudyMetadataSource();
+    // Gets all StudyMetadata objects: necessary for Hanging Protocol to access study metadata
+    const studyMetadataList = OHIF.utils.studyMetadataManager.all();
+    console.log("Got studyMetadataList:", studyMetadataList)
+    /*
+    setInterval(() => {
+      const studyMetadataList = OHIF.utils.studyMetadataManager.all();
+      console.log("Got studyMetadataList:", studyMetadataList)
 
-        // Get prior studies map
-        const studyPriorsMap = OHIF.studylist.functions.getStudyPriorsMap(studyMetadataList);
+    }, 1000)
+    */
 
-        // Creates Protocol Engine object with required arguments
-        const ProtocolEngine = new HP.ProtocolEngine(layoutManager, studyMetadataList, studyPriorsMap, studyMetadataSource);
+    // Instantiate StudyMetadataSource: necessary for Hanging Protocol to get study metadata
+    const studyMetadataSource = new OHIF.classes.OHIFStudyMetadataSource();
 
-        // Sets up Hanging Protocol engine
-        HP.setEngine(ProtocolEngine);
-    });
-};*/
+    // Get prior studies map
+    const studyPriorsMap = {}; //OHIF.studylist.functions.getStudyPriorsMap(studyMetadataList);
+
+    // Creates Protocol Engine object with required arguments
+    const ProtocolEngine = new HP.ProtocolEngine(protocolStore, studyMetadataList, studyPriorsMap, studyMetadataSource, layoutManager);
+
+    // Sets up Hanging Protocol engine
+    HP.setEngine(ProtocolEngine);
+  });
+};
+
 
 /*const viewportUtils = OHIF.viewerbase.viewportUtils;
 
@@ -69,6 +87,7 @@ class Viewer extends Component {
     // window.store.getState().viewports.activeViewportIndex
     activeViewportIndex: PropTypes.number.isRequired,
     isStudyLoaded: PropTypes.bool,
+    isHPApplied: PropTypes.bool,
     dialog: PropTypes.object,
   };
 
@@ -95,12 +114,17 @@ class Viewer extends Component {
         disassociate: this.disassociateStudy,
       },
     });
+
+
   }
 
   state = {
     isLeftSidePanelOpen: true,
     isRightSidePanelOpen: false,
+    isBottomBarOpen: false,
+    isHPApplied: false,
     selectedRightSidePanel: '',
+    selectedBottomBar: '',
     selectedLeftSidePanel: 'studies', // TODO: Don't hardcode this
     thumbnails: [],
   };
@@ -209,7 +233,8 @@ class Viewer extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { studies, isStudyLoaded } = this.props;
+    const { studies, isStudyLoaded, isHPApplied } = this.props;
+
     if (studies !== prevProps.studies) {
       this.setState({
         thumbnails: _mapStudiesToThumbnails(studies),
@@ -221,6 +246,9 @@ class Viewer extends Component {
 
       this.timepointApi.retrieveTimepoints({ patientId });
       this.measurementApi.retrieveMeasurements(patientId, [currentTimepointId]);
+      // EDIT: initHangingProtocol
+      console.log("Viewer got studies", studies)
+      initHangingProtocol();
     }
   }
 
@@ -267,6 +295,14 @@ class Viewer extends Component {
               ? this.state.selectedRightSidePanel
               : ''
           }
+          selectedBottomBar={
+            this.state.isBottomBarOpen
+              ? this.state.selectedBottomBar
+              : ''
+          }
+          handleBottomBarChange={() => {
+            this.setState({ isBottomBarOpen: !this.state.isBottomBarOpen })
+          }}
           handleSidePanelChange={(side, selectedPanel) => {
             const sideClicked = side && side[0].toUpperCase() + side.slice(1);
             const openKey = `is${sideClicked}SidePanelOpen`;
@@ -304,16 +340,19 @@ class Viewer extends Component {
                 activeIndex={this.props.activeViewportIndex}
               />
             ) : (
-              <ConnectedStudyBrowser
-                studies={this.state.thumbnails}
-                studyMetadata={this.props.studies}
-              />
-            )}
+                <ConnectedStudyBrowser
+                  studies={this.state.thumbnails}
+                  studyMetadata={this.props.studies}
+                />
+              )}
           </SidePanel>
 
           {/* MAIN */}
-          <div className={classNames('main-content')}>
-            <ConnectedViewerMain studies={this.props.studies} />
+          <div className={classNames('main-col')}>
+            <div className={classNames('main-content')}>
+              <ConnectedViewerMain studies={this.props.studies} />
+            </div>
+            <ConnectedBottomToolbar from="bottom" height='10%' isHidden={!this.state.isBottomBarOpen} />
           </div>
 
           {/* RIGHT */}
@@ -344,7 +383,7 @@ export default withDialog(Viewer);
  * @param {Study[]} studies
  * @param {DisplaySet[]} studies[].displaySets
  */
-const _mapStudiesToThumbnails = function(studies) {
+const _mapStudiesToThumbnails = function (studies) {
   return studies.map(study => {
     const { studyInstanceUid } = study;
 

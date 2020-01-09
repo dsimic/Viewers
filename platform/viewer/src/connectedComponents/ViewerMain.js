@@ -13,6 +13,7 @@ class ViewerMain extends Component {
     layout: PropTypes.object.isRequired,
     setViewportSpecificData: PropTypes.func.isRequired,
     clearViewportSpecificData: PropTypes.func.isRequired,
+    customProps: PropTypes.object,
   };
 
   constructor(props) {
@@ -150,6 +151,7 @@ class ViewerMain extends Component {
             studies={this.props.studies}
             viewportData={viewportData}
             setViewportData={this.setViewportData}
+            customProps={this.props.customProps}
           >
             {/* Children to add to each viewport that support children */}
           </ConnectedViewportGrid>

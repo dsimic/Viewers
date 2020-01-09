@@ -13,6 +13,7 @@ import { UserPreferencesTabs } from './UserPreferencesTabs';
 import { HotKeysPreferences } from './HotKeysPreferences';
 import { WindowLevelPreferences } from './WindowLevelPreferences';
 import { GeneralPreferences } from './GeneralPreferences';
+import { HangingProtocolsPreferences } from './HangingProtocolsPreferences';
 
 /**
  @typedef TabObject
@@ -45,6 +46,11 @@ const createTabs = () => {
       props: {},
       hidden: true,
     },
+    {
+      name: 'Hanging Protocols',
+      Component: HangingProtocolsPreferences,
+      props: {},
+    },
   ];
 };
 
@@ -71,20 +77,24 @@ function UserPreferencesForm({
 }) {
   const [tabs, setTabs] = useState(createTabs());
 
+  console.log("Got tabs", tabs);
+
   const createTabsState = (
     windowLevelData,
     hotkeyDefinitions,
-    generalPreferences
+    generalPreferences,
+    hangingProtocolPreferences,
   ) => {
     return {
       Hotkeys: { hotkeyDefinitions },
       'Window Level': { windowLevelData },
       General: { generalPreferences },
+      'Hanging Protocols': { hangingProtocolPreferences },
     };
   };
 
   const [tabsState, setTabsState] = useState(
-    createTabsState(windowLevelData, hotkeyDefinitions, generalPreferences)
+    createTabsState(windowLevelData, hotkeyDefinitions, generalPreferences, {})
   );
 
   const [tabsError, setTabsError] = useState(
@@ -128,7 +138,7 @@ function UserPreferencesForm({
     });
 
     // update tabs state
-    setTabs(createTabs(windowLevelData, hotkeyDefinitions, generalPreferences));
+    setTabs(createTabs(windowLevelData, hotkeyDefinitions, generalPreferences, {}));
 
     // reset errors
     setTabsError(

@@ -28,14 +28,14 @@ export default class ProtocolEngine {
    * @param  {Array} studies Array of study metadata
    * @param  {Map} priorStudies Map of prior studies
    * @param  {Object} studyMetadataSource Instance of StudyMetadataSource (ohif-viewerbase) Object to get study metadata
-   * @param  {Object} options
+   * @param  {Object} layoutManager instance of ConnectedLayoutManager
    */
   constructor(
     protocolStore,
     studies,
     priorStudies,
     studyMetadataSource,
-    options = {}
+    layoutManager,
   ) {
     // -----------
     // Type Validations
@@ -46,7 +46,7 @@ export default class ProtocolEngine {
     }
 
     if (
-      !(studies instanceof Array) &&
+      !(studies instanceof Array) ||
       !studies.every(study => study instanceof StudyMetadata)
     ) {
       throw new OHIFError(
@@ -60,7 +60,7 @@ export default class ProtocolEngine {
     this.studies = studies;
     this.priorStudies = priorStudies instanceof Map ? priorStudies : new Map();
     this.studyMetadataSource = studyMetadataSource;
-    this.options = options;
+    this.layoutManager = layoutManager;
 
     // Put protocol engine in a known state
     this.reset();
@@ -74,9 +74,11 @@ export default class ProtocolEngine {
    * Resets the ProtocolEngine to the best match
    */
   reset() {
-    const protocol = this.getBestProtocolMatch();
+    if (this.studies.length > 0) {
+      const protocol = this.getBestProtocolMatch();
 
-    this.setHangingProtocol(protocol);
+      this.setHangingProtocol(protocol);
+    }
   }
 
   /**
@@ -100,6 +102,12 @@ export default class ProtocolEngine {
     log.trace('ProtocolEngine::findMatchByStudy');
 
     const matched = [];
+    console.log("Getting getFirstInstance of study,", study, typeof (study));
+    if (!(study instanceof StudyMetadata)) {
+      throw new OHIFError(
+        "ProtocolEngine::constructor study is an instance of StudyMetadata"
+      );
+    }
     const studyInstance = study.getFirstInstance();
 
     // Set custom attribute for study metadata
@@ -453,10 +461,15 @@ export default class ProtocolEngine {
           };
 
           // Find the displaySet
-          const displaySet = study.findDisplaySet(displaySet =>
-            displaySet.images.find(
-              image => image.getSOPInstanceUID() === currentSOPInstanceUID
-            )
+          const displaySet = study.findDisplaySet(displaySet => {
+            // Avoid error, some display sets like docs and pdfs don't have
+            // the images attribute.
+            if ('images' in displaySet) {
+              return displaySet.images.find(
+                image => image.getSOPInstanceUID() === currentSOPInstanceUID
+              )
+            }
+          }
           );
 
           // If the instance was found, set the displaySet ID
@@ -508,24 +521,7 @@ export default class ProtocolEngine {
    * @param {number} numColumns
    */
   setLayout(numRows, numColumns) {
-    if (numRows < 1 && numColumns < 1) {
-      log.error(`Invalid layout ${numRows} x ${numColumns}`);
-      return;
-    }
-
-    if (typeof this.options.setLayout !== 'function') {
-      log.error('Hanging Protocol Engine setLayout callback is not defined');
-      return;
-    }
-
-    let viewports = [];
-    const numViewports = numRows * numColumns;
-
-    for (let i = 0; i < numViewports; i++) {
-      viewports.push({});
-    }
-
-    this.options.setLayout({ numRows, numColumns, viewports });
+    this.layoutManager.setLayout(numRows, numColumns);
   }
 
   /**
@@ -674,7 +670,7 @@ export default class ProtocolEngine {
 
     this.setLayout(layoutProps.rows, layoutProps.columns);
 
-    if (typeof this.options.setViewportSpecificData !== 'function') {
+    if (typeof this.layoutManager.setViewportSpecificData !== 'function') {
       log.error(
         'Hanging Protocol Engine setViewportSpecificData callback is not defined'
       );
@@ -683,7 +679,7 @@ export default class ProtocolEngine {
 
     // If viewportIndex is defined, then update only that viewport
     if (viewportIndex !== undefined && viewportData[viewportIndex]) {
-      this.options.setViewportSpecificData(
+      this.layoutManager.setViewportSpecificData(
         viewportIndex,
         viewportData[viewportIndex]
       );
@@ -691,10 +687,16 @@ export default class ProtocolEngine {
     }
 
     // Update all viewports
-    viewportData.forEach(viewportSpecificData => {
-      this.options.setViewportSpecificData(
+    viewportData.forEach((viewportSpecificData, index) => {
+      this.layoutManager.setViewportSpecificData(
         viewportSpecificData.viewportIndex,
         viewportSpecificData
+      );
+      this.layoutManager.setDisplaySettings(
+        viewportSpecificData.viewportIndex,
+        {
+          invert: (index % 2 == 1)
+        }
       );
     });
   }

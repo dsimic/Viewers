@@ -8,13 +8,18 @@ const {
 } = OHIF.redux.actions;
 
 const mapStateToProps = state => {
-  const { activeViewportIndex, layout, viewportSpecificData } = state.viewports;
+  const { activeViewportIndex, layout, viewportSpecificData, displaySettings } = state.viewports;
+
+  const customProps = {
+    displaySettings: displaySettings,
+  }
 
   return {
     activeViewportIndex,
     layout,
     viewportSpecificData,
-    viewports: state.viewports
+    viewports: state.viewports,
+    customProps: customProps,
   };
 };
 

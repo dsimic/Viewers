@@ -39,6 +39,35 @@
   width: 100%;
 }
 
+.main-col {
+  flex: 1;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+  transition: var(--sidepanel-transition);
+  width: 100%;
+}
+
+.row-bottom-toolbar {
+  flex: 1;
+  flex-grow:0;
+  flex-basis: 125px;
+  max-height: 25%;
+  border: var(--ui-border-thickness) solid var(--ui-border-color);
+  padding: 1em;
+  box-sizing: border-box;
+  transition: var(--sidepanel-transition);
+}
+
+.row-bottom-toolbar.is-hidden {
+  max-height: 0px;
+  flex-basis: 0;
+  padding: 0 1em;
+  margin: 0;
+  flex: 0;
+}
+
 @media only screen and (max-width: 768px) {
   /* Account for "Investigational Use" banner height */
   .FlexboxLayout {

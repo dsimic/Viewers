@@ -3,6 +3,7 @@ import OHIF from '@ohif/core';
 import { connect } from 'react-redux';
 import throttle from 'lodash.throttle';
 import { setEnabledElement } from './state';
+// import cornerstone from 'cornerstone-core';
 
 const { setViewportActive, setViewportSpecificData } = OHIF.redux.actions;
 const {
@@ -82,6 +83,23 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onElementEnabled: event => {
       const enabledElement = event.detail.element;
       setEnabledElement(viewportIndex, enabledElement);
+      console.log("onElementEnabled", viewportIndex, ownProps)
+      // Wait for image to render, then invert it
+      // cornerstone.setViewport(enabledElement, invertedViewport);
+      enabledElement.addEventListener(
+        'cornerstoneimagerendered',
+        imageRenderedEvent => {
+          if (ownProps.imageRendered) {
+            return;
+          }
+          ownProps.imageRendered = true;
+          console.log("OwnProps", ownProps)
+          const viewport = imageRenderedEvent.detail.viewport;
+          const invertedViewport = Object.assign({}, viewport, ownProps.displaySettings);
+
+          cornerstone.setViewport(enabledElement, invertedViewport);
+        }
+      );
       dispatch(
         setViewportSpecificData(viewportIndex, {
           // TODO: Hack to make sure our plugin info is available from the outset

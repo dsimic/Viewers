@@ -25,7 +25,9 @@ class ToolbarRow extends Component {
     isRightSidePanelOpen: PropTypes.bool.isRequired,
     selectedLeftSidePanel: PropTypes.string.isRequired,
     selectedRightSidePanel: PropTypes.string.isRequired,
+    selectedBottomBar: PropTypes.string,
     handleSidePanelChange: PropTypes.func,
+    handleBottomBarChange: PropTypes.func,
     activeContexts: PropTypes.arrayOf(PropTypes.string).isRequired,
     studies: PropTypes.array,
   };
@@ -59,7 +61,14 @@ class ToolbarRow extends Component {
           bottomLabel: this.props.t('Series'),
         },
       ],
-      right: [],
+      right: [
+        {
+          value: 'HPSteps',
+          icon: 'th-large',
+          bottomLabel: this.props.t('HP Steps'),
+        }
+      ],
+      bottomBar: [],
     };
 
     panelModules.forEach(panelExtension => {
@@ -106,7 +115,13 @@ class ToolbarRow extends Component {
     );
 
     const onPress = (side, value) => {
-      this.props.handleSidePanelChange(side, value);
+      console.log("Handling onPress", side, value)
+      if (value === 'HPSteps') {
+        this.props.handleBottomBarChange();
+
+      } else {
+        this.props.handleSidePanelChange(side, value);
+      }
     };
     const onPressLeft = onPress.bind(this, 'left');
     const onPressRight = onPress.bind(this, 'right');
@@ -122,6 +137,7 @@ class ToolbarRow extends Component {
             />
           </div>
           {buttonComponents}
+          <ConnectedLayoutButton />
           <ConnectedLayoutButton />
           <div
             className="pull-right m-t-1 rm-x-1"

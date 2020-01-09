@@ -39,4 +39,4 @@ export default {
   },
 };
 
-export { CornerstoneViewportDownloadForm };
+export { CornerstoneViewportDownloadForm, commandsModule };

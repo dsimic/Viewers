@@ -32,7 +32,8 @@ class OHIFCornerstoneViewport extends Component {
   };
 
   static defaultProps = {
-    customProps: {},
+    customProps: {
+    },
   };
 
   static propTypes = {
@@ -222,7 +223,7 @@ class OHIFCornerstoneViewport extends Component {
 
     if (
       displaySet.displaySetInstanceUid !==
-        prevDisplaySet.displaySetInstanceUid ||
+      prevDisplaySet.displaySetInstanceUid ||
       displaySet.sopInstanceUid !== prevDisplaySet.sopInstanceUid ||
       displaySet.frameIndex !== prevDisplaySet.frameIndex
     ) {
@@ -236,7 +237,7 @@ class OHIFCornerstoneViewport extends Component {
     if (!this.state.viewportData) {
       return null;
     }
-    const { viewportIndex } = this.props;
+    const { viewportIndex, displaySettings } = this.props;
     const {
       imageIds,
       currentImageIdIndex,

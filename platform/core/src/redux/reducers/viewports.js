@@ -9,6 +9,7 @@ import {
   SET_VIEWPORT_ACTIVE,
   SET_VIEWPORT_LAYOUT,
   SET_VIEWPORT_LAYOUT_AND_DATA,
+  SET_VIEWPORT_DISPLAY_SETTINGS,
 } from './../constants/ActionTypes.js';
 
 const DEFAULT_STATE = {
@@ -23,6 +24,7 @@ const DEFAULT_STATE = {
     ],
   },
   viewportSpecificData: {},
+  displaySettings: {},
 };
 
 /**
@@ -51,6 +53,13 @@ const viewports = (state = DEFAULT_STATE, action) => {
      */
     case SET_VIEWPORT_ACTIVE: {
       return { ...state, activeViewportIndex: action.viewportIndex };
+    }
+
+    case SET_VIEWPORT_DISPLAY_SETTINGS: {
+      const displaySettings = cloneDeep(state.displaySettings);
+      displaySettings[action.viewportIndex] = cloneDeep(action.viewportDisplaySettings);
+      console.log("Action displaySettings", displaySettings, action.viewportDisplaySettings)
+      return { ...state, displaySettings: displaySettings };
     }
 
     /**

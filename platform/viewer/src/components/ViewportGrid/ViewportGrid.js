@@ -8,7 +8,7 @@ import ViewportPane from './ViewportPane.js';
 import DefaultViewport from './DefaultViewport.js';
 import EmptyViewport from './EmptyViewport.js';
 
-const ViewportGrid = function(props) {
+const ViewportGrid = function (props) {
   const {
     activeViewportIndex,
     availablePlugins,
@@ -20,6 +20,7 @@ const ViewportGrid = function(props) {
     studies,
     viewportData,
     children,
+    customProps, // array of customProps, one for each viewport in layout.
   } = props;
 
   const rowSize = 100 / numRows;
@@ -56,14 +57,17 @@ const ViewportGrid = function(props) {
         ? displaySet.plugin
         : layout.plugin;
 
+
     const ViewportComponent = _getViewportComponent(
       data, // Why do we pass this as `ViewportData`, when that's not really what it is?
       viewportIndex,
       children,
       availablePlugins,
       pluginName,
-      defaultPluginName
+      defaultPluginName,
+      customProps.displaySettings[viewportIndex],
     );
+    console.log("ViewportPanes", viewportIndex, pluginName, defaultPluginName, ViewportComponent, customProps);
 
     return (
       <ViewportPane
@@ -149,7 +153,8 @@ function _getViewportComponent(
   children,
   availablePlugins,
   pluginName,
-  defaultPluginName
+  defaultPluginName,
+  displaySettings,
 ) {
   if (viewportData.displaySet) {
     pluginName = pluginName || defaultPluginName;
@@ -166,6 +171,9 @@ function _getViewportComponent(
       <ViewportComponent
         viewportData={viewportData}
         viewportIndex={viewportIndex}
+        customProps={{
+          displaySettings: displaySettings,
+        }}
         children={[children]}
       />
     );

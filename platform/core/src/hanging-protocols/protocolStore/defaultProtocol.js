@@ -8,14 +8,20 @@ function getDefaultProtocol() {
   protocol.id = 'defaultProtocol';
   protocol.locked = true;
 
+  const nRows = 2;
+  const nCols = 2;
+
   const oneByOne = new ViewportStructure('grid', {
-    rows: 1,
-    columns: 1,
+    rows: nRows,
+    columns: nCols,
   });
 
-  const viewport = new Viewport();
   const first = new Stage(oneByOne, 'oneByOne');
-  first.viewports.push(viewport);
+  const numViewports = nRows * nCols;
+  for (let i = 0; i < numViewports; i++) {
+    const viewport = new Viewport();
+    first.viewports.push(viewport);
+  }
 
   protocol.stages.push(first);
 
