@@ -695,6 +695,10 @@ export default class ProtocolEngine {
       this.layoutManager.setDisplaySettings(
         viewportSpecificData.viewportIndex,
         {
+          voi: {
+            windowCenter: 400,
+            windowWidth: 20,
+          },
           invert: (index % 2 == 1)
         }
       );
