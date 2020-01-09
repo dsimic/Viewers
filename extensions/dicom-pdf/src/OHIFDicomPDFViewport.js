@@ -7,6 +7,9 @@ import DicomPDFViewport from './DicomPDFViewport';
 const { DicomLoaderService } = OHIF.utils;
 
 class OHIFDicomPDFViewport extends Component {
+
+  _isMounted = false;
+
   static propTypes = {
     studies: PropTypes.object,
     displaySet: PropTypes.object,
@@ -32,14 +35,31 @@ class OHIFDicomPDFViewport extends Component {
   }
 
   componentDidMount() {
+    this._isMounted = true;
     const { displaySet, studies } = this.props.viewportData;
+    /* This operation was leading to the warning:
+    "Can't call setState (or forceUpdate) on an unmounted component. This is a no-op,"
+    due to the promise resolving and calling setState after the component
+    had already unmounted. For this reason we added the
+    this._isMounted check.
+    */
     DicomLoaderService.findDicomDataPromise(displaySet, studies).then(
-      data => this.setState({ byteArray: new Uint8Array(data) }),
+      data => {
+        if (this._isMounted) {
+          this.setState({ byteArray: new Uint8Array(data) })
+        }
+      },
       error => {
-        this.setState({ error });
+        if (this._isMounted) {
+          this.setState({ error });
+        }
         throw new Error(error);
       }
     );
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   render() {

@@ -25,6 +25,10 @@ export default function asyncComponent(importComponent) {
       });
     }
 
+    async componentWillUnmount() {
+      console.log("Async did unmount")
+    }
+
     render() {
       const C = this.state.component;
 

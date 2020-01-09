@@ -44,8 +44,8 @@ class MeasurementTableItem extends Component {
             <div>{this.getTableListItem()}</div>
           </OverlayTrigger>
         ) : (
-          <React.Fragment>{this.getTableListItem()}</React.Fragment>
-        )}
+            <React.Fragment>{this.getTableListItem()}</React.Fragment>
+          )}
       </React.Fragment>
     );
   }
@@ -86,6 +86,7 @@ class MeasurementTableItem extends Component {
       const deleteButton = this.getActionButton('Delete', this.onDeleteClick);
       actionButtons.push(deleteButton);
     }
+    console.log("measurementNumber: ", this.props.measurementData.measurementNumber)
 
     return (
       <TableListItem

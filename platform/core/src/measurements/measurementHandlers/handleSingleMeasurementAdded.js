@@ -21,7 +21,9 @@ export default function handleSingleMeasurementAdded({ eventData, tool }) {
   // Stop here if there's no measurement data or if it was cancelled
   if (!measurementData || measurementData.cancelled) return;
 
-  log.info('CornerstoneToolsMeasurementAdded');
+  // This function is called frequently during measurement,
+  // turning off  logging.
+  // log.info('CornerstoneToolsMeasurementAdded');
 
   const imageAttributes = getImageAttributes(eventData.element);
   const measurement = Object.assign({}, measurementData, imageAttributes, {

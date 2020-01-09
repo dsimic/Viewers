@@ -27,6 +27,9 @@ specialCaseHandlers[
 ] = handleSegmentationStorage;
 
 class OHIFCornerstoneViewport extends Component {
+
+  _isMounted = false;
+
   state = {
     viewportData: null,
   };
@@ -72,6 +75,7 @@ class OHIFCornerstoneViewport extends Component {
     sopInstanceUid,
     frameIndex = 0
   ) {
+    console.log("mount check getCornerstoneStack")
     if (!studies || !studies.length) {
       throw new Error('Studies not provided.');
     }
@@ -141,6 +145,7 @@ class OHIFCornerstoneViewport extends Component {
     sopInstanceUid,
     frameIndex
   ) => {
+    console.log("mount check getViewportData")
     let viewportData;
 
     switch (sopClassUid) {
@@ -177,7 +182,12 @@ class OHIFCornerstoneViewport extends Component {
     return viewportData;
   };
 
+  componentWillUnmount() {
+    console.log("CornerstoneViewport component unmounting");
+  }
+
   setStateFromProps() {
+    console.log("CornerstoneViewport mount setStateFromProps")
     const { studies, displaySet } = this.props.viewportData;
     const {
       studyInstanceUid,
@@ -214,6 +224,8 @@ class OHIFCornerstoneViewport extends Component {
   }
 
   componentDidMount() {
+    this.is_Mounted = true;
+    console.log("CornerstoneVewiport did mount.")
     this.setStateFromProps();
   }
 

@@ -67,7 +67,8 @@ const ViewportGrid = function (props) {
       defaultPluginName,
       customProps.displaySettings[viewportIndex],
     );
-    console.log("ViewportPanes", viewportIndex, pluginName, defaultPluginName, ViewportComponent, customProps);
+
+    // console.log("ViewportPanes", viewportIndex, pluginName, defaultPluginName, ViewportComponent, customProps);
 
     return (
       <ViewportPane

@@ -252,7 +252,13 @@ export default class MeasurementApi {
         this.syncMeasurementsAndToolData();
 
         cornerstone.getEnabledElements().forEach(enabledElement => {
-          cornerstone.updateImage(enabledElement.element);
+          // Added try/catch as uncaught error from image not yet loaded
+          // was frequently appearing.
+          try {
+            cornerstone.updateImage(enabledElement.element);
+          } catch (e) {
+            log.warn(e)
+          }
         });
 
         // Let others know that the measurements are updated
